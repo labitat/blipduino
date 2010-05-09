@@ -3,6 +3,7 @@ OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
 AVRDUDE = avrdude
 STTY = stty
+SED = sed
 
 NAME = power_meter
 
@@ -17,7 +18,7 @@ CFLAGS = -Os -g -mmcu=$(MCU) -DF_CPU=$(F_CPU) \
          -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums \
          -Wall -Wextra -pedantic -I$(ARDUINO_HEADERS)
 
-.PHONY: all list stty
+.PHONY: all list tty
 .PRECIOUS: %.o %.elf
 
 all: $(NAME).hex
@@ -36,8 +37,9 @@ all: $(NAME).hex
 
 %.hex: %.elf
 	@echo '  OBJCOPY $@'
-	@$(OBJCOPY) -O $(FORMAT) -R .eeprom $< $@ && \
-		stat --format='  %s bytes' $@
+	@$(OBJCOPY) -O $(FORMAT) -R .eeprom -S $< $@ && \
+	  echo "  $$((0x$$($(OBJDUMP) -h $@ | \
+	    $(SED) -n '6{s/^  0 \.sec1         //;s/ .*//;p}'))) bytes"
 
 # Create extended listing file from ELF output file.
 %.lss: %.elf
