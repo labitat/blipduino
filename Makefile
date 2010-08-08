@@ -53,8 +53,8 @@ list: $(NAME).lss
 	
 
 tty:
-	@echo '  STTY -F$(PORT) cs8 parenb raw -echo 9600'
-	@$(STTY) -F$(PORT) cs8 parenb raw -echo 9600
+	@echo '  STTY -F$(PORT) raw cs8 parenb -parodd -cstopb -echo 9600'
+	@$(STTY) -F$(PORT) raw cs8 parenb -parodd -cstopb -echo 9600
 
 clean:
 	rm -f *.o *.elf *.hex *.lss
