@@ -88,13 +88,7 @@ timer2_interrupt_a()
 
 adc_interrupt()
 {
-	uint8_t high;
-	uint8_t low;
-
-	low  = adc_data_low();
-	high = adc_data_high();
-
-	value = (high << 8) | low;
+	value = adc_data();
 }
 
 int
