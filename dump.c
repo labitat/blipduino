@@ -95,7 +95,7 @@ adc_interrupt()
 	value = adc_data();
 }
 
-int
+__attribute__((noreturn)) int
 main()
 {
 	serial_baud_9600();
@@ -128,6 +128,4 @@ main()
 		*p = '\0';
 		serial_puts(buf);
 	}
-
-	return 0;
 }

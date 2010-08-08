@@ -95,7 +95,7 @@ adc_interrupt()
 	value = adc_data();
 }
 
-int
+__attribute__((noreturn)) int
 main()
 {
 	uint8_t state = 0;
@@ -154,6 +154,4 @@ main()
 			sleep_disable();
 		}
 	}
-
-	return 0;
 }

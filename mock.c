@@ -93,7 +93,7 @@ timer2_interrupt_a()
 	time++;
 }
 
-int
+__attribute__((noreturn)) int
 main()
 {
 	pin13_mode_output();
@@ -131,6 +131,4 @@ main()
 		sleep_cpu();
 		sleep_disable();
 	}
-
-	return 0;
 }
