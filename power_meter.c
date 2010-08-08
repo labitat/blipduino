@@ -44,11 +44,16 @@ serial_interrupt_dre()
 static void
 serial_puts(char *str)
 {
-	while (output.printing) {
+again:
+	cli();
+	if (output.printing) {
 		sleep_enable();
+		sei();
 		sleep_cpu();
 		sleep_disable();
+		goto again;
 	}
+	sei();
 
 	output.str = str;
 	output.printing = 1;

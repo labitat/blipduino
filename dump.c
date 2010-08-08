@@ -49,12 +49,16 @@ serial_puts(char *str)
 
 	serial_interrupt_dre_enable();
 
-	while (output.printing) {
+again:
+	cli();
+	if (output.printing) {
 		sleep_enable();
+		sei();
 		sleep_cpu();
 		sleep_disable();
+		goto again;
 	}
-
+	sei();
 }
 
 static char *
