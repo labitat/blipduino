@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 
+#include <arduino/pins.h>
 #include <arduino/sleep.h>
 #include <arduino/serial.h>
 #include <arduino/timer2.h>
@@ -107,6 +108,9 @@ main()
 
 	sleep_mode_idle();
 
+	pin13_mode_output();
+	pin13_low();
+
 	/* setup timer2 to trigger interrupt a
 	 * once every millisecond */
 	timer2_mode_ctc();
@@ -128,6 +132,8 @@ main()
 
 		if (new_state != state) {
 			uint16_t now = time;
+
+			pin13_toggle();
 
 			/* if this is the first down-edge after
 			 * being "low" for at least 100ms */
