@@ -124,15 +124,15 @@ main()
 
 	sei();
 	while (1) {
-		uint8_t new_state = value > 420;
+		uint8_t new_state = value < 190;
 
 		if (new_state != state) {
 			uint16_t now = time;
 
-			/* if this is the first up-edge after
-			 * being "low" for at least 300ms */
+			/* if this is the first down-edge after
+			 * being "low" for at least 100ms */
 			if (!state && new_state &&
-			    now - last_state_change > 300) {
+			    now - last_state_change > 100) {
 				char *p;
 
 				timer2_clock_reset();
