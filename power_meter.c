@@ -145,6 +145,7 @@ main()
 		sei();
 
 		value = adc_data();
+		new_value = 0;
 
 		if (state && value < BOUND_LOW) {
 			uint16_t now = time;
