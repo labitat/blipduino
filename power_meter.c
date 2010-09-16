@@ -23,6 +23,11 @@
 #include <arduino/timer2.h>
 #include <arduino/adc.h>
 
+#define BOUND_LOW 10
+#define BOUND_HIGH 350
+
+static volatile uint8_t new_value;
+
 static volatile struct {
 	char *str;
 	uint8_t printing;
@@ -83,7 +88,6 @@ sprint_uint16_b10(char *p, uint16_t n)
 }
 
 static volatile uint16_t time;
-static volatile uint16_t value;
 static char buf[16] __attribute__ ((section (".noinit")));
 
 timer2_interrupt_a()
@@ -93,14 +97,13 @@ timer2_interrupt_a()
 
 adc_interrupt()
 {
-	value = adc_data();
+	new_value = 1;
 }
 
 __attribute__((noreturn)) int
 main()
 {
 	uint8_t state = 0;
-	uint16_t last_state_change = 0;
 
 	serial_baud_9600();
 	serial_mode_8e1();
@@ -112,10 +115,11 @@ main()
 	pin13_low();
 
 	/* setup timer2 to trigger interrupt a
-	 * once every millisecond */
+	 * once every millisecond
+	 * 128 * (124 + 1) / 16MHz = 1ms */
 	timer2_mode_ctc();
-	timer2_compare_a_set(124);
 	timer2_clock_d128();
+	timer2_compare_a_set(124);
 	timer2_interrupt_a_enable();
 
 	adc_reference_internal_5v();
@@ -128,36 +132,41 @@ main()
 
 	sei();
 	while (1) {
-		uint8_t new_state = value < 190;
+		uint16_t value;
 
-		if (new_state != state) {
-			uint16_t now = time;
-
-			pin13_toggle();
-
-			/* if this is the first down-edge after
-			 * being "low" for at least 100ms */
-			if (!state && new_state &&
-			    now - last_state_change > 100) {
-				char *p;
-
-				timer2_clock_reset();
-				time = 0;
-
-				p = sprint_uint16_b10(buf, now);
-				*p++ = '\n';
-				*p = '\0';
-				serial_puts(buf);
-
-				now = 0;
-			}
-
-			last_state_change = now;
-			state = new_state;
-		} else {
+		cli();
+		if (!new_value) {
 			sleep_enable();
+			sei();
 			sleep_cpu();
 			sleep_disable();
+			continue;
+		}
+		sei();
+
+		value = adc_data();
+
+		if (state && value < BOUND_LOW) {
+			uint16_t now = time;
+			char *p;
+
+			timer2_clock_reset();
+			time = 0;
+
+			pin13_low();
+
+			p = sprint_uint16_b10(buf, now);
+			*p++ = '\n';
+			*p = '\0';
+			serial_puts(buf);
+
+			state = 0;
+			continue;
+		}
+
+		if (value > BOUND_HIGH) {
+			pin13_high();
+			state = 1;
 		}
 	}
 }
