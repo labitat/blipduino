@@ -105,10 +105,11 @@ main()
 	sleep_mode_idle();
 
 	/* setup timer2 to trigger interrupt a
-	 * once every millisecond */
+	 * once every millisecond
+	 * 128 * (124 + 1) / 16MHz = 1ms */
 	timer2_mode_ctc();
-	timer2_compare_a_set(124);
 	timer2_clock_d128();
+	timer2_compare_a_set(124);
 	timer2_interrupt_a_enable();
 
 	adc_reference_internal_5v();
