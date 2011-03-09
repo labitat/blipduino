@@ -93,14 +93,14 @@ timer2_interrupt_a()
 	time++;
 }
 
-__attribute__((noreturn)) int
+int __attribute__((noreturn))
 main()
 {
 	pin13_mode_output();
 
 	serial_baud_9600();
 	serial_mode_8e1();
-	serial_tx();
+	serial_transmitter_enable();
 
 	sleep_mode_idle();
 

@@ -95,12 +95,12 @@ adc_interrupt()
 	value = adc_data();
 }
 
-__attribute__((noreturn)) int
+int __attribute__((noreturn))
 main()
 {
 	serial_baud_9600();
 	serial_mode_8e1();
-	serial_tx();
+	serial_transmitter_enable();
 
 	sleep_mode_idle();
 
