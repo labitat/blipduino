@@ -94,7 +94,7 @@ timer2_interrupt_a()
 }
 
 int __attribute__((noreturn))
-main()
+main(void)
 {
 	pin13_mode_output();
 

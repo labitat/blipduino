@@ -83,7 +83,7 @@ sprint_uint16_b10(char *p, uint16_t n)
 
 static volatile uint16_t time;
 static volatile uint16_t value;
-static char buf[16] __attribute__ ((section (".noinit")));
+static char buf[16] __attribute__((section (".noinit")));
 
 timer2_interrupt_a()
 {
@@ -96,7 +96,7 @@ adc_interrupt()
 }
 
 int __attribute__((noreturn))
-main()
+main(void)
 {
 	serial_baud_9600();
 	serial_mode_8e1();

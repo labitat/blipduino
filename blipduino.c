@@ -101,7 +101,7 @@ adc_interrupt()
 }
 
 int __attribute__((noreturn))
-main()
+main(void)
 {
 	uint8_t state = 0;
 
