@@ -2,7 +2,7 @@
 NAME = blipduino
 
 ## Point this to the directory where you did
-##   git clone git://github.com/esmil/onuidra-headers.git arduino
+##   git clone git://github.com/esmil/oniudra-headers.git arduino
 ARDUINO_HEADERS = .
 
 ## Change this according to your code to make the tty and cat targets work
@@ -12,18 +12,18 @@ MODE     = $(MODE_RAW) $(MODE_8) $(MODE_E) $(MODE_2)# 8E2
 ## Uncomment your arduino version below
 
 ## Duemilanove
-MCU        = atmega328p
-F_CPU      = 16000000UL
-PORT       = /dev/ttyUSB0
-PROGRAMMER = arduino
-PROG_BAUD  = 57600
+MCU       = atmega328p
+F_CPU     = 16000000UL
+PORT      = /dev/ttyUSB0
+PROG      = arduino
+PROG_BAUD = 57600
 
 ## Uno
-#MCU        = atmega328p
-#F_CPU      = 16000000UL
-#PORT       = /dev/ttyACM0
-#PROGRAMMER = arduino
-#PROG_BAUD  = 115200
+#MCU       = atmega328p
+#F_CPU     = 16000000UL
+#PORT      = /dev/ttyACM0
+#PROG      = arduino
+#PROG_BAUD = 115200
 
 CC      = avr-gcc
 OBJCOPY = avr-objcopy
@@ -43,6 +43,9 @@ MODE_O   = parenb parodd
 MODE_1   = -cstopb
 MODE_2   = cstopb
 
+PROG_arduino = -D -P$(PORT) -b$(PROG_BAUD)
+PROG_avrispmkII = -Pusb
+
 OPT        = 2
 CFLAGS     = -O$(OPT) -pipe -gdwarf-2
 CFLAGS    += -mmcu=$(MCU) -DF_CPU=$(F_CPU) -I$(ARDUINO_HEADERS)
@@ -52,6 +55,7 @@ CFLAGS    += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 #CFLAGS    += -Wa,-adhlns=$(<:.c=.lst)
 CFLAGS    += -Wall -Wextra -Wno-variadic-macros -pedantic
 
+LDFLAGS    = -Wl,--relax
 ## Uncomment to create a map file
 #LDFLAGS   += -Wl,-Map=$(NAME).map,--cref
 ## Uncomment for minimal printf suport
@@ -65,14 +69,12 @@ CFLAGS    += -Wall -Wextra -Wno-variadic-macros -pedantic
 ## Uncomment for trigonometry and other floating point functions
 #LDFLAGS   += -lm
 
-FILES     ?= $(NAME).c
-
 .PHONY: all list tty cat
 .PRECIOUS: %.elf
 
 all: $(NAME).hex
 
-$(NAME).elf: $(FILES)
+%.elf: $(or $(FILES),%.c)
 	@echo '  CC $@'
 	@$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
@@ -81,6 +83,9 @@ $(NAME).elf: $(FILES)
 	@$(OBJCOPY) -O ihex -R .eeprom -S $< $@
 	@echo "  $$((0x$$($(OBJDUMP) -h $@ | $(SED) -n '6{s/^  0 \.sec1         //;s/ .*//;p}'))) bytes"
 
+%.bin: %.elf
+	@echo '  OBJCOPY $@'
+	@$(OBJCOPY) -O binary -R .eeprom -S $< $@
 
 # Create extended listing file from ELF output file.
 %.lss: %.elf
@@ -92,8 +97,8 @@ $(NAME).elf: $(FILES)
 	@echo '  NM $@'
 	@$(NM) -n $< > $@
 
-upload: $(NAME).hex $(PORT)
-	@$(AVRDUDE) -vD -p$(MCU) -P$(PORT) -c$(PROGRAMMER) -b$(PROG_BAUD) -Uflash:w:$<:i
+upload: $(NAME).hex
+	$(AVRDUDE) -v -p$(MCU) -c$(PROG) $(PROG_$(PROG)) -Uflash:w:$<:i
 
 list: $(NAME).lss
 
@@ -105,4 +110,4 @@ cat: $(PORT)
 	@$(CAT) $(PORT)
 
 clean:
-	rm -f *.elf *.hex *.map *.lst *.lss *.sym
+	rm -f *.elf *.hex *.bin *.map *.lst *.lss *.sym
