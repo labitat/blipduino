@@ -23,7 +23,7 @@
 #include <arduino/timer2.h>
 #include <arduino/adc.h>
 
-#define BOUND_LOW 10
+#define BOUND_LOW 250
 #define BOUND_HIGH 350
 
 static volatile uint8_t new_value;
